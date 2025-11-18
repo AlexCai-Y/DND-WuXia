@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Attacker / Defender selector</title>
+    <style>
+        body { font-family: system-ui, Arial; margin: 20px; }
+        .container { display: flex; gap: 40px; }
+        .panel { width: 300px; border: 1px solid #ddd; padding: 12px; border-radius: 8px; }
+        .title { font-weight: 700; margin-bottom: 8px; }
+        .img-placeholder { width: 100%; height: 160px; background: #f5f5f5; border: 1px dashed #ccc; display:flex; align-items:center; justify-content:center; color:#888; margin-bottom:8px; }
+        select, button { width:100%; padding:8px; margin-top:6px; }
+        .status { margin-top:12px; font-size:0.95rem; color:#333; }
+        .controls { margin-top:10px; }
+        .footer { margin-top:20px; }
+    </style>
+</head>
+<body>
+    <h2>Simple Attacker / Defender selector</h2>
+    <div class="container">
+        <div class="panel" id="attacker-panel">
+            <div class="title">Attacker</div>
+            <div class="img-placeholder" id="attacker-img">(image)</div>
+            <label for="attacker-select">Choose attacker</label>
+            <select id="attacker-select">
+                <option value="">-- select --</option>
+            </select>
+            <div class="controls">
+                <button id="attacker-confirm" disabled>Confirm attacker</button>
+            </div>
+            <div class="status">Current attacker: <span id="current-attacker">(none)</span></div>
+        </div>
+
+        <div class="panel" id="defender-panel">
+            <div class="title">Defender</div>
+            <div class="img-placeholder" id="defender-img">(image)</div>
+            <label for="defender-select">Choose defender</label>
+            <select id="defender-select">
+                <option value="">-- select --</option>
+            </select>
+            <div class="controls">
+                <button id="defender-confirm" disabled>Confirm defender</button>
+            </div>
+            <div class="status">Current defender: <span id="current-defender">(none)</span></div>
+        </div>
+    </div>
+
+
+    <div class="footer">
+        <button id="start-btn" disabled>Start (enabled when both selected)</button>
+    </div>
+<script>
+
+const participants = ["A","B","C","D"];
+
+
+const attackerSelect = document.getElementById('attacker-select');
+const defenderSelect = document.getElementById('defender-select');
+const attackerConfirm = document.getElementById('attacker-confirm');
+const defenderConfirm = document.getElementById('defender-confirm');
+const currentAttackerSpan = document.getElementById('current-attacker');
+const currentDefenderSpan = document.getElementById('current-defender');
+const startBtn = document.getElementById('start-btn');
+
+function populateSelect(sel) {
+    for (const p of participants) {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        sel.appendChild(opt);
+    }
+}
+
+
+populateSelect(attackerSelect);
+populateSelect(defenderSelect);
+
+
+attackerSelect.addEventListener('change', () => {
+    attackerConfirm.disabled = attackerSelect.value === '';
+});
+
+
+defenderSelect.addEventListener('change', () => {
+    defenderConfirm.disabled = defenderSelect.value === '';
+});
+
+
+async function postJSON(url, obj) {
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(obj),
+    });
+    return res.json();
+}
+
+
+attackerConfirm.addEventListener('click', async () => {
+    const name = attackerSelect.value;
+    if (!name) return;
+    try {
+        const r = await postJSON('/set_attacker', { name });
+        if (r.status === 'ok') {
+            currentAttackerSpan.textContent = r.current_attacker;
+            attackerSelect.value = '';
+            attackerConfirm.disabled = true;
+            checkStartEnabled();
+        }
+    } catch (e) {
+        alert('Failed to set attacker: ' + e);
+    }
+});
+
+
+defenderConfirm.addEventListener('click', async () => {
+    const name = defenderSelect.value;
+    if (!name) return;
+    try {
+        const r = await postJSON('/set_defender', { name });
+        if (r.status === 'ok') {
+            currentDefenderSpan.textContent = r.current_defender;
+            defenderSelect.value = '';
+            defenderConfirm.disabled = true;
+            checkStartEnabled();
+        }
+    } catch (e) {
+        alert('Failed to set defender: ' + e);
+    }
+});
+
+
+function checkStartEnabled() {
+    fetch('/state').then(r => r.json()).then(s => {
+        const both = s.current_attacker && s.current_defender;
+        startBtn.disabled = !both;
+    }).catch(_=>{});
+}
+
+
+setInterval(checkStartEnabled, 2000);
+fetch('/state').then(r=>r.json()).then(s => {
+    if (s.current_attacker) currentAttackerSpan.textContent = s.current_attacker;
+    if (s.current_defender) currentDefenderSpan.textContent = s.current_defender;
+    checkStartEnabled();
+});
+
+
+</script>
+</body>
+</html>
