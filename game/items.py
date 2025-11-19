@@ -1,3 +1,5 @@
+EQUIPMENTS = ["WEAPON", "HELMET", "ARMOUR", "PANTS", "BOOTS", "EARRING", "RING", "AMULET"]
+
 class Item():
 
 	def __init__(self, name):

@@ -1,7 +1,7 @@
 import random
-import game.main as main
+import game.items as item
 
-EQUIPMENTS = main.EQUIPMENTS
+EQUIPMENTS = item.EQUIPMENTS
 
 class Controllable():
 	
