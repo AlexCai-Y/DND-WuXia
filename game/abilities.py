@@ -1,4 +1,4 @@
-class Abilitiy():
+class Ability():
 
 	def __init__(self, name, type, attribute, yy, ratio, weapon, effect, action, dmg_type):
 		self.name = name 

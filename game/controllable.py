@@ -1,4 +1,7 @@
 import random
+import game.main as main
+
+EQUIPMENTS = main.EQUIPMENTS
 
 class Controllable():
 	
@@ -93,8 +96,11 @@ class Controllable():
 	
 	def add_buff(self, buff):
 		self.temp_buffs.append(buff)
-		buff.trigger(self)
 			
+	
+	def remove_buff(self, buff):
+		if buff in self.temp_buffs:
+			self.temp_buffs.remove(buff)
 		
 		
 class Human(Controllable):

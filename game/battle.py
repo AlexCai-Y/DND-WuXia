@@ -5,6 +5,7 @@ class Battle():
 	def __init__(self):
 	
 		self.rounds = 0
+		self.turn = 0
 		self.participants = []
 		self.initiatives = []
 		self.current_player = None 
@@ -20,7 +21,6 @@ class Battle():
 		else:
 			print("战斗已经开始，无法加入新成员。")
 
-		
 		
 	def roll_initiatives(self, new_member = None):
 		if self.status == "Not Started":
@@ -46,8 +46,9 @@ class Battle():
 		self.status = "Started"
 		self.rounds = 1
 		self.roll_initiatives()
-		self.current_player = self.initiative[0]
-	
+		self.turn = 0
+		self.current_player = self.initiatives[self.turn][0]
+
 	
 	def battle_pause(self):
 		self.status = "Paused"
@@ -57,3 +58,22 @@ class Battle():
 		self.status = "Resumed"
 		for initiative in self.initiatives:
 			print("{0}先攻为{1}。".format(initiative[0].name, initiative[1]))
+
+
+	def next_turn(self):
+		# Move to the next player in initiative order
+		# Check if the previous player has DOT buffs to trigger at end of round
+		for buff in self.current_player.temp_buffs:
+			if type(buff).__name__ == 'DOT' and buff.trigger_time == 1:  # end of round
+				buff.trigger(self.current_player)
+		
+		self.turn += 1
+		if self.turn >= len(self.initiatives):
+			self.rounds += 1
+			self.turn = 0
+		self.current_player = self.initiatives[self.turn][0]
+		# Check if the current player has DOT buffs to trigger at start of round
+		for buff in self.current_player.temp_buffs:
+			if type(buff).__name__ == 'DOT' and buff.trigger_time == 0:  # start of round
+				buff.trigger(self.current_player)
+		
