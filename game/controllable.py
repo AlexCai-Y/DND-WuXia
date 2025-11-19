@@ -1,5 +1,4 @@
 import random
-import main
 
 class Controllable():
 	
@@ -10,12 +9,12 @@ class Controllable():
 		self.skill = 0
 		self.knowledge = 0
 
-		self.strength = 0
-		self.vital = 0
-		self.movement = 0 
-		self.spirit = 0
-		self.perception = 0
-		self.appearance = 0
+		self.strength = 1
+		self.vital = 1
+		self.movement = 1 
+		self.spirit = 1
+		self.perception = 1
+		self.appearance = 1
 		
 		self.counter = 0
 		self.break_ability = 0
@@ -45,19 +44,15 @@ class Controllable():
 		self.equipted_item = {}
 		
 		for equipment in EQUIPMENTS:
-			self.equipted_item[equipment] = None 
+			self.equipted_item[equipment] = None
 			
 		self.abilities = []
 		self.core = []
-		self.other_buffs = []
+		self.perm_buffs = []
+		self.temp_buffs = []
 		self.speed = 0
 		
 		self.status = "Alive"
-		
-		
-	def set_attributes(self):
-		
-	
 	
 	
 	def compute_attributes(self):
@@ -73,7 +68,6 @@ class Controllable():
 		self.crit_in -= self.perception//20
 		self.hit_out += self.movement//2
 		self.hit_in += self.perception//2
-
 	
 	
 	def parrying(self, break_ab):
@@ -95,6 +89,11 @@ class Controllable():
 	def unequip(self, clas):
 		self.equipted_item[clas] = None
 		self.compute_attributes()
+
+	
+	def add_buff(self, buff):
+		self.temp_buffs.append(buff)
+		buff.trigger(self)
 			
 		
 		
@@ -128,7 +127,6 @@ class Human(Controllable):
 	
 	def defend(self, damage):
 		hp_reduction = 0
-		if 
 		print("造成{0}点伤害。".format(damage))
 		if self.life >= hp_reduction:
 			self.life -= hp_reduction

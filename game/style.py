@@ -1,4 +1,4 @@
-import abilities
+import game.abilities as abi
 
 class Style():
 
@@ -8,5 +8,5 @@ class Style():
 		self.abilities = []
 		
 		
-	def add_ability(self, ability):
+	def add_ability(self, ability: abi.Ability):
 		self.abilities.append(ability)
