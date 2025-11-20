@@ -73,7 +73,16 @@ class Battle():
 			self.turn = 0
 		self.current_player = self.initiatives[self.turn][0]
 		# Check if the current player has DOT buffs to trigger at start of round
+		self.current_player.recover_action()
 		for buff in self.current_player.temp_buffs:
 			if type(buff).__name__ == 'DOT' and buff.trigger_time == 0:  # start of round
 				buff.trigger(self.current_player)
+
+	def possible_actions(self):
+		actions = []
+		for ability in self.current_player.abilities:
+			if self.current_player.can_use(ability):
+				actions.append(f"ability_{ability.name}")
+		return actions
+		
 		

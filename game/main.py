@@ -14,6 +14,18 @@ except FileNotFoundError:
 
 battle = battle.Battle()
 
+battle.roll_initiatives()
+
+battle.battle_start()
+
+while {
+    available_action = battle.possible_actions()
+    # The player choose what to do.
+    battle.current_player.act()
+    # When the player clicks end turn.
+    battle.next_turn()
+}
+
 
 
 

@@ -1,5 +1,6 @@
 import random
 import game.items as item
+import game.abilities as ability
 
 EQUIPMENTS = item.EQUIPMENTS
 
@@ -101,6 +102,67 @@ class Controllable():
 	def remove_buff(self, buff):
 		if buff in self.temp_buffs:
 			self.temp_buffs.remove(buff)
+
+	
+	def can_use(self, ability):
+		# Check if the ability can be used based on available actions and other conditions
+		if ability.action == "ACTION" and not self.action:
+			return False
+		if ability.action == "SEC_ACTION" and not self.sec_action:
+			return False
+		if ability.action == "RE_ACTION" and not self.re_action:
+			return False
+		if ability.action == "SIMPLE_ACTION" and not self.simple_action:
+			return False
+		if ability.action == "CHARGED" and not (self.action and self.sec_action):
+			return False
+		if ability.action == "ALL" and not (self.action and self.sec_action and self.re_action and self.simple_action):
+			return False
+		if ability.mana_cost > self.mana:
+			return False
+		if ability.rage_cost > self.rage:
+			return False
+		return True
+
+	
+	def recover_action(self):
+		self.action = True
+		self.sec_action = True
+		self.re_action = True
+		self.simple_action = True
+
+	
+	def consume_action(self, ability):
+		if ability.action == "ACTION":
+			self.action = False
+		elif ability.action == "SEC_ACTION":
+			self.sec_action = False
+		elif ability.action == "RE_ACTION":
+			self.re_action = False
+		elif ability.action == "SIMPLE_ACTION":
+			self.simple_action = False
+		elif ability.action == "CHARGED":
+			self.action = False
+			self.sec_action = False
+		elif ability.action == "ALL":
+			self.action = False
+			self.sec_action = False
+			self.re_action = False
+			self.simple_action = False
+		
+	
+	def recover_all(self):
+		self.action = True
+		self.sec_action = True
+		self.re_action = True
+		self.simple_action = True
+		self.rage = 0
+		self.hp = self.max_life
+		self.mana = self.max_mana
+
+
+	def act(self, target):
+		
 		
 		
 class Human(Controllable):
@@ -110,6 +172,9 @@ class Human(Controllable):
 		
 		
 	def attack(self, ability, target):
+		
+		self.consume_action(ability)
+		
 		if ability.dmg_type == "IN":
 			hit_score = self.hit_in + random.randint(0, 20)
 		elif ability.dmg_type == "OUT":
