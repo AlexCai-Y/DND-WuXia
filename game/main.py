@@ -41,7 +41,7 @@ while True:
                 end_turn = True
             else:
                 battle.current_player.act(cmd)
-
+                available_action = battle.possible_actions()
 
         except queue.Empty:
             pass
