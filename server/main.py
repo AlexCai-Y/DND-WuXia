@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from typing import Optional
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 
@@ -6,8 +7,8 @@ from fastapi.staticfiles import StaticFiles
 app = FastAPI()
 
 
-current_attacker: str | None = None
-current_defender: str | None = None
+current_attacker: Optional[str] = None
+current_defender: Optional[str] = None
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

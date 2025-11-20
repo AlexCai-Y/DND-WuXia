@@ -161,8 +161,8 @@ class Controllable():
 		self.mana = self.max_mana
 
 
-	def act(self, target):
-		
+	def act(self, target, cmd):
+		pass
 		
 		
 class Human(Controllable):

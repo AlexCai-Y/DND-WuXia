@@ -18,14 +18,37 @@ battle.roll_initiatives()
 
 battle.battle_start()
 
-while {
-    available_action = battle.possible_actions()
-    # The player choose what to do.
-    battle.current_player.act()
-    # When the player clicks end turn.
-    battle.next_turn()
-}
+def frontend():
 
+    while True:
+        cmd = input("Enter a command: ")
+        commands.put(cmd) 
+
+threading.Thread(target=frontend, daemon=True).start()
+
+
+while True:
+    end_turn = False
+    # The list of actions a player can do.
+    available_action = battle.possible_actions()
+
+    # Wait until the player press end_turn.
+    while not end_turn:
+        try:
+            cmd = commands.get_nowait()
+
+            if cmd == "end turn":
+                end_turn = True
+            else:
+                battle.current_player.act(cmd)
+
+
+        except queue.Empty:
+            pass
+
+        time.sleep(0.1)
+    
+    battle.next_turn()
 
 
 
