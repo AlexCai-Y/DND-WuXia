@@ -1,6 +1,6 @@
 import random
-import game.items as item
-import game.abilities as ability
+import items as item
+import abilities as ability
 
 EQUIPMENTS = item.EQUIPMENTS
 

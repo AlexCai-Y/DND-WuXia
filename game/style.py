@@ -1,4 +1,4 @@
-import game.abilities as abi
+import abilities as abi
 
 class Style():
 

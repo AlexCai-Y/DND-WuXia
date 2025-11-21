@@ -1,54 +1,90 @@
-import game.battle as battle
-import game.items as item
-import game.core as core
-import game.abilities as abi
-import game.style as style
-import game.buffs as buff
-import game.controllable as ctrl
+import battle as battle
+import items as item
+import core as core
+import abilities as abi
+import style as style
+import buffs as buff
+import controllable as ctrl
 import pickle
+import socketio
+from aiohttp import web
+import queue
+import threading
+import time
 
-try:
-    characters = pickle.load(open("save/characters.pkl", "rb"))
-except FileNotFoundError:
-    characters = []
+
+# try:
+#     characters = pickle.load(open("save/characters.pkl", "rb"))
+# except FileNotFoundError:
+#     characters = []
 
 battle = battle.Battle()
+
+player = ctrl.Human("Player")
+enemy1 = ctrl.Human("Enemy1")
+enemy2 = ctrl.Human("Enemy2")
+
+battle.add_participant(player)
+battle.add_participant(enemy1)
+battle.add_participant(enemy2)
 
 battle.roll_initiatives()
 
 battle.battle_start()
 
-def frontend():
+commands = queue.Queue()
 
+sio = socketio.AsyncServer(
+    async_mode="aiohttp",
+    cors_allowed_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ]
+)
+app = web.Application()
+sio.attach(app)
+
+print("ACCEPTED ORIGINS:", sio.eio.cors_allowed_origins)
+
+@sio.event
+async def connect(sid, environ):
+    print("Client connected:", sid, "Origin:", environ.get("HTTP_ORIGIN"))
+
+@sio.event
+async def endTurn(sid):
+    print("Frontend requested END TURN from", sid)
+    commands.put("endTurn")
+
+@sio.event
+async def action(sid, data):
+    print("Frontend action:", data)
+    commands.put(data)
+
+
+def game_loop():
     while True:
-        cmd = input("Enter a command: ")
-        commands.put(cmd) 
+        end_turn = False
+        available_actions = battle.possible_actions()
 
-threading.Thread(target=frontend, daemon=True).start()
+        while not end_turn:
+            try:
+                cmd = commands.get_nowait()
 
+                if cmd == "endTurn":
+                    end_turn = True
+                else:
+                    battle.current_player.act(cmd)
+                    available_actions = battle.possible_actions()
 
-while True:
-    end_turn = False
-    # The list of actions a player can do.
-    available_action = battle.possible_actions()
+            except queue.Empty:
+                pass
 
-    # Wait until the player press end_turn.
-    while not end_turn:
-        try:
-            cmd = commands.get_nowait()
+            time.sleep(0.1)
 
-            if cmd == "end turn":
-                end_turn = True
-            else:
-                battle.current_player.act(cmd)
-                available_action = battle.possible_actions()
+        battle.next_turn()
 
-        except queue.Empty:
-            pass
-
-        time.sleep(0.1)
-    
-    battle.next_turn()
+threading.Thread(target=game_loop, daemon=True).start()
 
 
-
+if __name__ == "__main__":
+    web.run_app(app, port=3001)

@@ -30,7 +30,7 @@ class Battle():
 						rolled_initiative = random.randint(0, 20)
 						initiatives[participant] = rolled_initiative + participant.initiative
 			for key in initiatives:
-				self.initiative.append((key, initiatives[key]))
+				self.initiatives.append((key, initiatives[key]))
 				
 			self.initiatives.sort(key=lambda x: x[1], reverse=True)
 			for initiative in self.initiatives:
@@ -68,6 +68,7 @@ class Battle():
 				buff.trigger(self.current_player)
 		
 		self.turn += 1
+		print("下一回合")
 		if self.turn >= len(self.initiatives):
 			self.rounds += 1
 			self.turn = 0

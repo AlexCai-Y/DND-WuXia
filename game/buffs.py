@@ -1,4 +1,4 @@
-import game.controllable as ctrl
+import controllable as ctrl
 
 class Buff():
 
