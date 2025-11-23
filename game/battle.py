@@ -46,7 +46,7 @@ class Battle():
 		self.status = "Started"
 		self.rounds = 1
 		self.roll_initiatives()
-		self.turn = 0
+		self.turn = 1
 		self.current_player = self.initiatives[self.turn][0]
 
 	
@@ -69,10 +69,10 @@ class Battle():
 		
 		self.turn += 1
 		print("下一回合")
-		if self.turn >= len(self.initiatives):
+		if self.turn > len(self.initiatives):
 			self.rounds += 1
-			self.turn = 0
-		self.current_player = self.initiatives[self.turn][0]
+			self.turn = 1
+		self.current_player = self.initiatives[self.turn-1][0]
 		# Check if the current player has DOT buffs to trigger at start of round
 		self.current_player.recover_action()
 		for buff in self.current_player.temp_buffs:
