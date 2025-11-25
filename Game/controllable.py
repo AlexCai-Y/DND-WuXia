@@ -9,9 +9,7 @@ class Controllable():
 	def __init__(self, name: str):
 		self.name = name 
 		
-		self.talent = 0
-		self.skill = 0
-		self.knowledge = 0
+		self.comprehension = 0
 
 		self.strength = 1
 		self.vital = 1
@@ -21,7 +19,6 @@ class Controllable():
 		self.appearance = 1
 		
 		self.counter = 0
-		self.break_ability = 0
 		self.evade = 0
 		self.parry = 0
 		self.max_life = 0
@@ -72,18 +69,7 @@ class Controllable():
 		self.crit_in -= self.perception//20
 		self.hit_out += self.movement//2
 		self.hit_in += self.perception//2
-	
-	
-	def parrying(self, break_ab):
-		rolled_counter = random.randint(0, 20)
-		if self.counter + rolled_counter >= break_ab:
-			print("看破{0} vs. 虚招{1}: 看破成功。".format(self.counter + rolled_counter, break_ab))
-			return True
-			
-		else:
-			self.status = "Alive"
-			print("看破{0} vs. 虚招{1}: 架招被破。".format(self.counter + rolled_counter, break_ab))
-			return False
+
 		
 	def equip(self, item):
 		self.equipted_item[item.clas] = item
@@ -149,7 +135,37 @@ class Controllable():
 			self.sec_action = False
 			self.re_action = False
 			self.simple_action = False
-		
+
+	def get_mastery_additive(self, weapon_type: str) -> int:
+        mastery_level = self.weapon_mastery[weapon_type]
+        return mastery_level * max(3, mastery_level // 4 + 1)
+        # if mastery_level <= 4:
+        #     return mastery_level
+        # elif mastery_level <= 8:
+        #     return 2 * mastery_level
+        # else:
+        #     return 3 * mastery_level
+
+    def get_weapon_additive(self) -> int:
+        return self.equipped_weapon.get_attack_bonus()
+
+    # Attribute Setters
+    def set_attr(self, value: int) -> None:
+        self.strength = value
+
+    # Getter methods for attributes
+    def get_stat(self, attr_name):
+        if hasattr(self, attr_name):
+            return getattr(self, attr_name)
+        if attr_name in self.skills:
+            return self.skills[attr_name]
+        raise KeyError(f"Stat '{attr_name}' not found")
+
+    def get_accuracy(self, dmg_type: str) -> int:
+        if dmg_type == "internal":
+            return self.internal_accuracy
+        else:
+            return self.external_accuracy
 	
 	def recover_all(self):
 		self.action = True
